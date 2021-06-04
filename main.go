@@ -3,7 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
-	"time"
+	"os/signal"
+	"syscall"
 
 	"github.com/Pauloo27/pog/img"
 	"github.com/Pauloo27/pog/utils"
@@ -15,10 +16,14 @@ func main() {
 		os.Exit(-1)
 	}
 
-	// TODO: check if file exists
 	// TODO: check if file is a image
 	// TODO: handle http(s) url
 	path := os.Args[1]
+
+	if stat, err := os.Stat(path); os.IsNotExist(err) || stat.IsDir() {
+		fmt.Println("File not found")
+		os.Exit(-1)
+	}
 
 	go func() {
 		err := img.StartDaemon()
@@ -40,7 +45,16 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	// TODO: wait for user interaction
-	time.Sleep(5 * time.Second)
-	utils.ShowCursor()
+
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		for range c {
+			utils.ShowCursor()
+			os.Exit(-1)
+		}
+	}()
+
+	for {
+	}
 }
