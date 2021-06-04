@@ -1,4 +1,4 @@
-BINARY_NAME = tuner
+BINARY_NAME = pog 
 
 build:
 	go build -v
